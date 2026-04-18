@@ -6,9 +6,7 @@
   <title>CROICM</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -17,7 +15,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      height: 100vh;
       width: 100vw;
       overflow: hidden;
     }
@@ -25,47 +23,35 @@
     .painel {
       width: 100vw;
       height: 100vh;
-      background: white;
-      padding: 2vh 4vw 4vh;
-      text-align: center;
+      padding: 2vh 4vw;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
+      text-align: center;
     }
 
     .logo {
       max-width: 32vw;
       max-height: 18vh;
-      width: auto;
-      height: auto;
-      margin-top: 1vh;
     }
 
     .frase {
       font-size: 2.4vw;
-      line-height: 1.5;
-      color: #222;
       max-width: 90vw;
       text-transform: uppercase;
-      margin: 1vh auto;
-      font-weight: 500;
+      line-height: 1.5;
     }
 
     .timer {
       font-size: 11vw;
       font-weight: bold;
       color: #666;
-      margin: 1vh 0;
-      letter-spacing: 0.4vw;
     }
 
     .botoes {
       display: flex;
-      justify-content: center;
       gap: 1.2vw;
-      flex-wrap: wrap;
-      margin-bottom: 2vh;
     }
 
     button {
@@ -75,170 +61,138 @@
       font-size: 1.6vw;
       cursor: pointer;
       min-width: 12vw;
-      font-weight: 500;
     }
 
-    .iniciar {
-      background: #1db954;
-      color: black;
-    }
-
-    .resetar {
-      background: #e7c44b;
-      color: black;
-    }
-
-    .pausar {
-      background: #ff1e1e;
-      color: black;
-    }
-
-    .tela {
-      background: linear-gradient(90deg, #5a4bdb, #4f46e5);
-      color: white;
-    }
-
-    @media (max-width: 900px) {
-      .logo {
-        max-width: 60vw;
-        max-height: 16vh;
-      }
-
-      .frase {
-        font-size: 4vw;
-      }
-
-      .timer {
-        font-size: 20vw;
-      }
-
-      button {
-        font-size: 4vw;
-        min-width: 32vw;
-        padding: 1.5vh 3vw;
-      }
-    }
+    .iniciar { background: #1db954; }
+    .resetar { background: #e7c44b; }
+    .pausar { background: #ff1e1e; }
+    .tela { background: #4f46e5; color: white; }
   </style>
 </head>
 
 <body>
-  <div class="painel">
-    <img src="logo.png" alt="Logo da Igreja" class="logo">
 
-    <div class="frase">
-      NÃO ANDEIS ANSIOSOS POR COISA ALGUMA; ANTES EM TUDO SEJAM OS VOSSOS PEDIDOS
-      CONHECIDOS DIANTE DE DEUS PELA ORAÇÃO E SÚPLICA, COM AÇÃO DE GRAÇAS.
-      <br><br>
-      — FILIPENSES 4:6-7
-    </div>
+<div class="painel">
 
-    <div class="timer" id="timer">05:00</div>
+  <img src="logo.png" class="logo">
 
-    <div class="botoes">
-      <button class="iniciar" onclick="iniciar()">Iniciar</button>
-      <button class="resetar" onclick="resetar()">Resetar</button>
-      <button class="pausar" onclick="pausar()">Pausar</button>
-      <button class="tela" onclick="alternarTelaCheia()">Tela cheia</button>
-    </div>
+  <div class="frase">
+    NÃO ANDEIS ANSIOSOS POR COISA ALGUMA; ANTES EM TUDO SEJAM OS VOSSOS PEDIDOS
+    CONHECIDOS DIANTE DE DEUS PELA ORAÇÃO E SÚPLICA, COM AÇÃO DE GRAÇAS.
+    <br><br>
+    — FILIPENSES 4:6-7
   </div>
 
-  <script>
-    let tempoRestante = 300;
-    let intervalo = null;
-    let alarmeTocando = false;
+  <div class="timer" id="timer">05:00</div>
 
-    function atualizarTimer() {
-      const minutos = Math.floor(tempoRestante / 60);
-      const segundos = tempoRestante % 60;
+  <div class="botoes">
+    <button class="iniciar" onclick="iniciar()">Iniciar</button>
+    <button class="resetar" onclick="resetar()">Resetar</button>
+    <button class="pausar" onclick="pausar()">Pausar</button>
+    <button class="tela" onclick="alternarTelaCheia()">Tela cheia</button>
+  </div>
 
-      const timer = document.getElementById("timer");
+</div>
 
-      timer.textContent =
-        String(minutos).padStart(2, "0") + ":" +
-        String(segundos).padStart(2, "0");
+<script>
+  let tempoRestante = 300;
+  let intervalo = null;
+  let alarmeTocando = false;
+  let contextoAudio = null;
 
-      if (tempoRestante <= 30) {
-        timer.style.color = "red";
-      } else {
-        timer.style.color = "#666";
+  function atualizarTimer() {
+    const minutos = Math.floor(tempoRestante / 60);
+    const segundos = tempoRestante % 60;
+
+    const timer = document.getElementById("timer");
+
+    timer.textContent =
+      String(minutos).padStart(2, "0") + ":" +
+      String(segundos).padStart(2, "0");
+
+    timer.style.color = tempoRestante <= 30 ? "red" : "#666";
+  }
+
+  function tocarAlarme() {
+    if (alarmeTocando || !contextoAudio) return;
+    alarmeTocando = true;
+
+    const duracao = 300;
+    const pausa = 150;
+    const repeticoes = 3;
+
+    function beep(i) {
+      if (i >= repeticoes) {
+        alarmeTocando = false;
+        return;
       }
+
+      const osc = contextoAudio.createOscillator();
+      const gain = contextoAudio.createGain();
+
+      osc.frequency.value = 880;
+      gain.gain.value = 0.3;
+
+      osc.connect(gain);
+      gain.connect(contextoAudio.destination);
+
+      osc.start();
+
+      setTimeout(() => {
+        osc.stop();
+        setTimeout(() => beep(i + 1), pausa);
+      }, duracao);
     }
 
-    function tocarAlarme() {
-      if (alarmeTocando) return;
-      alarmeTocando = true;
+    beep(0);
+  }
 
-      const contexto = new (window.AudioContext || window.webkitAudioContext)();
-      const duracao = 300;
-      const pausa = 150;
-      const repeticoes = 3;
+  function iniciar() {
+    if (intervalo) return;
 
-      function beep(i) {
-        if (i >= repeticoes) {
-          alarmeTocando = false;
-          return;
+    // 🔊 Libera o áudio
+    if (!contextoAudio) {
+      contextoAudio = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    contextoAudio.resume();
+
+    intervalo = setInterval(() => {
+      if (tempoRestante > 0) {
+        tempoRestante--;
+        atualizarTimer();
+
+        if (tempoRestante === 0) {
+          clearInterval(intervalo);
+          intervalo = null;
+          tocarAlarme();
         }
-
-        const oscilador = contexto.createOscillator();
-        const ganho = contexto.createGain();
-
-        oscilador.type = "sine";
-        oscilador.frequency.setValueAtTime(880, contexto.currentTime);
-        ganho.gain.setValueAtTime(0.2, contexto.currentTime);
-
-        oscilador.connect(ganho);
-        ganho.connect(contexto.destination);
-
-        oscilador.start();
-
-        setTimeout(() => {
-          oscilador.stop();
-          setTimeout(() => beep(i + 1), pausa);
-        }, duracao);
       }
+    }, 1000);
+  }
 
-      beep(0);
-    }
+  function pausar() {
+    clearInterval(intervalo);
+    intervalo = null;
+  }
 
-    function iniciar() {
-      if (intervalo) return;
-
-      intervalo = setInterval(() => {
-        if (tempoRestante > 0) {
-          tempoRestante--;
-          atualizarTimer();
-
-          if (tempoRestante === 0) {
-            clearInterval(intervalo);
-            intervalo = null;
-            tocarAlarme();
-          }
-        }
-      }, 1000);
-    }
-
-    function pausar() {
-      clearInterval(intervalo);
-      intervalo = null;
-    }
-
-    function resetar() {
-      clearInterval(intervalo);
-      intervalo = null;
-      tempoRestante = 300;
-      alarmeTocando = false;
-      atualizarTimer();
-    }
-
-    function alternarTelaCheia() {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
-    }
-
+  function resetar() {
+    clearInterval(intervalo);
+    intervalo = null;
+    tempoRestante = 300;
+    alarmeTocando = false;
     atualizarTimer();
-  </script>
+  }
+
+  function alternarTelaCheia() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  atualizarTimer();
+</script>
+
 </body>
 </html>
