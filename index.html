@@ -122,9 +122,7 @@
 </head>
 
 <body>
-
   <div class="painel">
-
     <img src="logo.png" alt="Logo da Igreja" class="logo">
 
     <div class="frase">
@@ -142,7 +140,6 @@
       <button class="pausar" onclick="pausar()">Pausar</button>
       <button class="tela" onclick="alternarTelaCheia()">Tela cheia</button>
     </div>
-
   </div>
 
   <script>
@@ -174,7 +171,7 @@
       const contexto = new (window.AudioContext || window.webkitAudioContext)();
       const duracao = 300;
       const pausa = 150;
-      let repeticoes = 3;
+      const repeticoes = 3;
 
       function beep(i) {
         if (i >= repeticoes) {
@@ -243,12 +240,5 @@
 
     atualizarTimer();
   </script>
-
-</body>
-</html>
-
-    atualizarTimer();
-  </script>
-
 </body>
 </html>
